@@ -1,18 +1,27 @@
 import time
+import socket
 
-from smbus2 import SMBusWrapper
+import zmq
+import yaml
+import quick2wire.i2c as i2c
 
 
-print('Hello')
+if __name__ == '__main__':
 
-while True:
-    try:
-        with SMBusWrapper(1) as bus:
-            # Read a block of 16 bytes from address 80, offset 0
-            block = bus.read_i2c_block_data(80, 0, 16)
-    except:
-        print('error...')
-    time.sleep(0.5)
+    context = zmq.Context()
+    publisher = context.socket(zmq.PUB)
+    server = yaml.load(open('config.yaml'))['server']
+    port = server['port']
+    host = server['host']
+    if host == 'auto':
+        host = socket.gethostbyname('raspberrypi.local')
+    publisher.bind('tcp://{}:{}'.format(host, port))
 
-# Returned value is a list of 16 bytes
-print(block)
+    while True:
+        with i2c.I2CMaster() as bus:
+            data = bus.transaction(i2c.reading(8, 6))
+        temp = data[0][-2:]
+        temp = int.from_bytes(temp, byteorder='little', signed=True)
+        print(temp)
+        publisher.send_pyobj(temp)
+        time.sleep(0.05)

@@ -29,7 +29,7 @@ Upgrade and install dependencies:
 
     sudo apt-get update
     sudo apt-get upgrade
-    sudo apt-get install git i2c-tools
+    sudo apt-get install git i2c-tools libzmq3-dev
 
 Download and install Miniconda:
 
@@ -62,17 +62,31 @@ If everything went well, the output should look like this:
     60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
     70: -- -- -- -- -- -- -- --
 
-Now, let us create a virtual environment for the project:
-
-    conda create -n stowaway python=3
-    source activate stowaway
-
 Clone the project and create a virtual environment:
 
     git clone https://github.com/CojoCompany/stowaway.git
     cd stowaway
+    conda create -n stowaway python=3
+    source activate stowaway
 
 Then, within the virtual environment, install the required packages:
 
     pip install --upgrade pip
     pip install -r requirements.txt
+
+Optionally, Stowaway can send data in real time over the network using ZeroMQ. To activate that functionality, just make sure to install `pyzmq`:
+
+    conda install pyzmq
+
+
+## Connecting the CY8CKIT-048 to the Raspberry Pi 3
+
+Communication between the modules is implemented over I2C, being the Raspberry the master module and the CY8CKIT-048 the slave.
+
+Although not mandatory, it may be convenient to connect not only the I2C SDA and SCL pins, but also GND pins (specially if the boards are powered from different sources).
+
+| Raspberry pin | CY8CKIT-048 pin |
+| --- | --- |
+| I2C1\_SDA (pin 3) | SDA (P4.1) |
+| I2C1\_SCL (pin 5) | SCL (P4.0) |
+| GND (pin 39) | GND |
