@@ -12,13 +12,12 @@ if __name__ == '__main__':
     context = zmq.Context()
     publisher = context.socket(zmq.PUB)
     server = yaml.load(open('config.yaml'))['server']
-    port = server['port']
     host = server['host']
     try:
         ip_address(host)
     except ValueError:
         host = socket.gethostbyname(host)
-    publisher.bind('tcp://{}:{}'.format(host, port))
+    publisher.bind('tcp://{}:{}'.format(host, server['port']))
 
     while True:
         with i2c.I2CMaster() as bus:
@@ -26,5 +25,5 @@ if __name__ == '__main__':
         temp = data[0][-2:]
         temp = int.from_bytes(temp, byteorder='little', signed=True)
         print(temp)
-        publisher.send_pyobj(temp)
+        publisher.send_pyobj(('TEMP', time.time(), temp / 100.))
         time.sleep(0.05)
