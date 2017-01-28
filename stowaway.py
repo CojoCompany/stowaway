@@ -1,5 +1,6 @@
 import time
 import socket
+from ipaddress import ip_address
 
 import zmq
 import yaml
@@ -13,8 +14,10 @@ if __name__ == '__main__':
     server = yaml.load(open('config.yaml'))['server']
     port = server['port']
     host = server['host']
-    if host == 'auto':
-        host = socket.gethostbyname('raspberrypi.local')
+    try:
+        ip_address(host)
+    except ValueError:
+        host = socket.gethostbyname(host)
     publisher.bind('tcp://{}:{}'.format(host, port))
 
     while True:
