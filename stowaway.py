@@ -6,6 +6,14 @@ import zmq
 import yaml
 import quick2wire.i2c as i2c
 
+import sqlalchemy
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+import datetime
+
+from database import Temperature, Base
+
 
 if __name__ == '__main__':
 
@@ -19,6 +27,11 @@ if __name__ == '__main__':
     except ValueError:
         host = socket.gethostbyname(host)
     publisher.bind('tcp://{}:{}'.format(host, port))
+    
+    # DataBase setup
+    engine = create_engine('sqlite:////home/pi/sensors.db', echo=True)
+    Session = sessionmaker(bind=engine)
+    Base.metadata.create_all(engine)
 
     while True:
         with i2c.I2CMaster() as bus:
@@ -27,4 +40,11 @@ if __name__ == '__main__':
         temp = int.from_bytes(temp, byteorder='little', signed=True)
         print(temp)
         publisher.send_pyobj(temp)
+        
+        # DB storage
+        session = Session()
+        session.add(Temperature(time = datetime.datetime.now(), temperature = temp))
+        session.commit()
+        session.close()
+        
         time.sleep(0.05)
