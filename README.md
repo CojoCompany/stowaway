@@ -78,7 +78,27 @@ Optionally, Stowaway can send data in real time over the network using ZeroMQ. T
 
     conda install pyzmq
 
+### Mariadb Set up
 
+Download and install mariadb server and client
+
+    sudo apt-get install mariadb-server
+    
+Configure and create the data base for sensors info ('sensors'), a new user ('cypress'), password ('cypress') and privileges
+    
+    mysql -u root -p
+    mysql> CREATE DATABASE sensors;
+    mysql> CREATE USER 'cypress'@'localhost' IDENTIFIED BY 'cypress';
+    mysql> GRANT ALL PRIVILEGES ON sensors.* TO 'cypress'@'localhost';
+    mysql> flush PRIVILEGES;
+    mysql> quit
+
+Download and install MySQLdb module for python within the virtual environment and required dependencies
+
+    sudo apt-get install libmysqlclient-dev 
+    pip install mysqlclient
+    
+    
 ## Connecting the CY8CKIT-048 to the Raspberry Pi 3
 
 Communication between the modules is implemented over I2C, being the Raspberry the master module and the CY8CKIT-048 the slave.

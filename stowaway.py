@@ -14,6 +14,8 @@ import datetime
 
 from database import Temperature, Base
 
+import MySQLdb
+
 
 if __name__ == '__main__':
 
@@ -28,8 +30,8 @@ if __name__ == '__main__':
         host = socket.gethostbyname(host)
     publisher.bind('tcp://{}:{}'.format(host, port))
     
-    # DataBase setup
-    engine = create_engine('sqlite:////home/pi/sensors.db', echo=True)
+    # MariaDb setup
+    engine = create_engine('mysql+mysqldb://cypress:cypress@localhost:3306/sensors', echo=True)
     Session = sessionmaker(bind=engine)
     Base.metadata.create_all(engine)
 
