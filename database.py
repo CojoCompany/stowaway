@@ -1,3 +1,4 @@
+import time
 from threading import Thread
 
 import zmq
@@ -10,8 +11,10 @@ from sqlalchemy import Column, Integer, Float, DateTime
 
 
 class Writer(Thread):
-    def __init__(self, context, polltimeout=100):
+    def __init__(self, context, polltimeout=100, commit_frequency=2.):
         super().__init__()
+        self.polltimeout = polltimeout
+        self.commit_frequency = commit_frequency
 
         self.subscriber = context.socket(zmq.SUB)
         self.subscriber.connect('inproc://dbwrite')
@@ -22,12 +25,13 @@ class Writer(Thread):
         self.db_uri = 'mysql+mysqldb://cypress:cypress@localhost:3306/sensors'
 
     def run(self):
-        engine = create_engine(self.db_uri, echo=True)
+        engine = create_engine(self.db_uri)
         session = sessionmaker(bind=engine)()
         Base.metadata.create_all(engine)
 
+        t0 = time.time()
         while True:
-            events = dict(self.poller.poll(100))
+            events = dict(self.poller.poll(self.polltimeout))
             if not events:
                 continue
             for socket in events:
@@ -35,7 +39,9 @@ class Writer(Thread):
                     continue
                 message = socket.recv_pyobj()
                 self.store(session, message)
-            session.commit()
+            if time.time() - t0 > self.commit_frequency:
+                session.commit()
+                t0 = time.time()
         session.close()
 
     def store(self, session, message):
