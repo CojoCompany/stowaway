@@ -1,3 +1,5 @@
 PyYAML
 pyzmq
 quick2wire-api
+SQLAlchemy
+mysqlclient
