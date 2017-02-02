@@ -35,7 +35,7 @@ if __name__ == '__main__':
         temp = data[0][-2:]
         temp = int.from_bytes(temp, byteorder='little', signed=True) / 100.
         print(now, temp)
-        publisher.send_pyobj(('TEMP', now.timestamp(), temp))
+        publisher.send_pyobj(('TEMP', temp))
         database.send_pyobj(('TEMP', now, temp))
 
         time.sleep(0.05)
