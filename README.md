@@ -77,34 +77,6 @@ Then, within the virtual environment, install the required packages:
 Optionally, Stowaway can send data in real time over the network using ZeroMQ. To activate that functionality, just make sure to install `pyzmq`:
 
     conda install pyzmq
-
-### Mariadb-MySql Set up
-
-Download and install mariadb server and client
-
-    sudo apt-get install mariadb-server
-    
-Modify configuration to include remote access. Find the line bind-address on the file 'my.cnf' and change 127.0.0.1 by 0.0.0.0. Save the file
-
-    sudo nano /etc/mysql/my.cnf
-    
-Restart service
-
-    sudo service mysql restart
-
-Configure and create the data base for sensors info ('sensors'), a new user ('cypress'), password ('cypress') and privileges
-    
-    mysql -u root -p
-    mysql> CREATE DATABASE sensors;
-    mysql> CREATE USER 'cypress'@'localhost' IDENTIFIED BY 'cypress';
-    mysql> GRANT ALL PRIVILEGES ON sensors.* TO 'cypress'@'%';
-    mysql> flush PRIVILEGES;
-    mysql> quit
-
-Download and install MySQLdb module for python within the virtual environment and required dependencies
-
-    sudo apt-get install libmysqlclient-dev 
-    pip install mysqlclient
     
     
 ## Connecting the CY8CKIT-048 to the Raspberry Pi 3
@@ -118,3 +90,15 @@ Although not mandatory, it may be convenient to connect not only the I2C SDA and
 | I2C1\_SDA (pin 3) | SDA (P4.1) |
 | I2C1\_SCL (pin 5) | SCL (P4.0) |
 | GND (pin 39) | GND |
+
+
+## Comparison of different logging alternatives
+
+Conditions:
+- ZeroMQ included
+- Temperature, Humidity and  included
+
+mysql | 19-28 %
+sqlite | 16-21 %
+logging-csv | 7-8 %
+redis | ? %

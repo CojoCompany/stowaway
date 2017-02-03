@@ -1,5 +1,4 @@
 scp stowaway.py pi@raspberrypi.local:/home/pi
 scp config.yaml pi@raspberrypi.local:/home/pi
-scp database.py pi@raspberrypi.local:/home/pi
 ssh -t pi@raspberrypi.local 'export PATH="/home/pi/.miniconda3/bin:$PATH" && \
     source activate stowaway && python stowaway.py'
