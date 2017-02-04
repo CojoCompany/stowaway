@@ -1,4 +1,3 @@
 PyYAML
 pyzmq
 quick2wire-api
-
