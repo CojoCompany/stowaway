@@ -1,3 +1,4 @@
 bokeh
 pandas
 jupyter notebook
+numpy
