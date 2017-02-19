@@ -11,7 +11,7 @@ import quick2wire.i2c as i2c
 import logging
 
 import struct
-from datastructs import five_std_sensors as l
+from datastructs import gyroscope as l
 
 if __name__ == '__main__':
 
@@ -31,23 +31,42 @@ if __name__ == '__main__':
                         filename='sensors.log', level=logging.INFO)
 
     format_chain = ''.join(x[1] for x in l)
-    format_chain_s = struct.calcsize(format_chain)
+    format_chain_size = struct.calcsize(format_chain)
 
+    last_time = datetime.datetime.utcnow().timestamp()
+    integrated = 0.
     while True:
         with i2c.I2CMaster() as bus:
-            data = bus.transaction(i2c.reading(8, format_chain_s))
+            data = bus.transaction(i2c.reading(8, format_chain_size))
         now = datetime.datetime.utcnow()
         field = struct.unpack("<" + format_chain,data[0])
         data_dict = dict(zip([y[0] for y in l], field))
-        temp = data_dict['Temperature']/10
-        hum = data_dict['Humidity']/10
-        light = data_dict['LightIntensity']
+
+        gyro = data_dict['gyroscope'] - 32
+        vdiff = 1.2 * gyro / 2048
+        dps = vdiff / 0.003752
+        degrees = dps * (now.timestamp() - last_time)
+        if abs(degrees) < 0.01:
+            degrees = 0
+        integrated -= degrees
+
+        temp = data_dict['temperature'] / 10
+        hum = data_dict['humidity'] / 10
+        light = data_dict['light']
+
+        print(' - integrated', integrated)
+        print(' - temperature', temp)
+        print(' - humidity', hum)
+        print(' - light', light)
+        print(' - gyroscope', integrated)
         publisher.send_pyobj(('T', now.timestamp(), temp))
         publisher.send_pyobj(('H', now.timestamp(), hum))
         publisher.send_pyobj(('L', now.timestamp(), light))
-        logging.info('T,{},{}'.format(now,temp))
-        logging.info('H,{},{}'.format(now,hum))
-        logging.info('L,{},{}'.format(now,light))
-        print(now, temp, hum, light)
+        publisher.send_pyobj(('G', now.timestamp(), (0, 0, integrated)))
+        logging.info('T,{},{}'.format(now, temp))
+        logging.info('H,{},{}'.format(now, hum))
+        logging.info('L,{},{}'.format(now, light))
+        logging.info('G,{},{}'.format(now, dps))
 
-        time.sleep(0.05)
+        time.sleep(1)
+        last_time = now.timestamp()

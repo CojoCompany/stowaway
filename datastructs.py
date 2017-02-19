@@ -1,8 +1,9 @@
-# Data structures exchanged between Cypress and Raspberry pi within i2c. 
+# Data structures exchanged between Cypress and Raspberry pi within i2c.
 # The C structures from Cypress are saved as python lists of tuplas [name, size]
 # where the size is a character specified on python struct module (https://docs.python.org/3/library/struct.html) that corresponds to C types.
 
-five_std_sensors =  [('Version','H'),
+five_std_sensors =  [
+    ('Version','H'),
     ('Vth','H'),
     ('Rth','H'),
     ('Temperature','h'),
@@ -20,4 +21,12 @@ five_std_sensors =  [('Version','H'),
     ('RawCountsRefCap','H'),
     ('RawCountsHumidity','H'),
     ('SensorCapacitance','H'),
-    ('Humidity','H')]
+    ('Humidity','H'),
+]
+
+gyroscope =  [
+    ('temperature','h'),
+    ('light','H'),
+    ('humidity','H'),
+    ('gyroscope','h'),
+]
